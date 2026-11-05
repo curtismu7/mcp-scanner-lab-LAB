@@ -2,9 +2,10 @@ import React, { useCallback, useEffect, useState } from "react";
 import { getInfo, getFixtures, requestModeSwitch, resetServer, runScan } from "./lib/api.js";
 import ModeToggle from "./components/ModeToggle.jsx";
 import ScanTab from "./tabs/ScanTab.jsx";
+import DiagramTab from "./tabs/DiagramTab.jsx";
 import AboutTab from "./tabs/AboutTab.jsx";
 
-export const TABS = [["scan", "Scanner"], ["about", "About"]];
+export const TABS = [["scan", "Scanner"], ["diagram", "How it fits"], ["about", "About"]];
 export const FALLBACK_BANNER = "MOCK mode. SIMULATED: the scanner runs on the built-in demo fixtures. In-process, no tenant, no outbound network. The scanner reports — it never blocks.";
 const read = (k, d) => { try { return localStorage.getItem(k) ?? d; } catch { return d; } };
 const write = (k, v) => { try { localStorage.setItem(k, v); } catch { /* not remembered */ } };
@@ -94,6 +95,7 @@ export default function App() {
 
       <main id="main" tabIndex={-1}>
         {tab === "scan" ? <ScanTab info={info} fixtures={fixtures} run={run} onRun={onScan} busy={busy} error={error} /> : null}
+        {tab === "diagram" ? <DiagramTab diagram={fixtures?.diagram} /> : null}
         {tab === "about" ? <AboutTab /> : null}
       </main>
 

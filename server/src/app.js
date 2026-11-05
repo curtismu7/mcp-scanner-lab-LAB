@@ -9,6 +9,7 @@ import { createHealth } from './health.js';
 import { createMode, MODES } from './mode.js';
 import { workspaceId, newWorkspaceId } from './workspace.js';
 import { scanTools, scanContent, validateToolCall, scanAgentCard, CATEGORIES } from './scanner.js';
+import { buildDiagram } from './diagramData.js';
 import { POISONED_MCP, POISONED_CARD, TRANSFER_TOOL, ABUSE_ARGS, CLEAN_ARGS, CLEAN_MCP, CLEAN_CARD } from './fixtures.js';
 
 const WEB_DIST = process.env.WEB_DIST || path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../web/dist');
@@ -53,6 +54,7 @@ export function createApp({ health = createHealth(), mode = createMode(), fixtur
 
   api.get('/fixtures', (_req, res) => res.json({
     banner: BANNER(mode.source()), source: mode.source(), workspaceId: workspaceId(_req),
+    diagram: buildDiagram(),
     poisoned: { mcp: fixtures.POISONED_MCP, card: fixtures.POISONED_CARD },
     clean: { mcp: fixtures.CLEAN_MCP, card: fixtures.CLEAN_CARD },
     transferTool: fixtures.TRANSFER_TOOL, abuseArgs: fixtures.ABUSE_ARGS, cleanArgs: fixtures.CLEAN_ARGS,

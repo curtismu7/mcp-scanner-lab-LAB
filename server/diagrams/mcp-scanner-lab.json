@@ -1,0 +1,173 @@
+{
+  "schema": "diagram-studio/1",
+  "id": "mcp-scanner-lab",
+  "title": "Detect client-side, enforce at the Privilege gateway",
+  "lede": "The four Tool & Agent Safety categories of the PingOne Privilege AI Gateway guardrails: the scanner sees the poison, the schema mismatch, the abusive call and the hostile Agent Card before an agent acts — and the Privilege gateway is where the same attacks are enforced on live calls.",
+  "groups": {
+    "agent": {
+      "label": "The agent and its context",
+      "color": "blue"
+    },
+    "hostile": {
+      "label": "The hostile sources",
+      "color": "red"
+    },
+    "scan": {
+      "label": "This lab: scan at ingest / dispatch",
+      "color": "amber"
+    },
+    "enforce": {
+      "label": "PingOne Privilege: enforce at the gateway",
+      "color": "dark"
+    },
+    "run": {
+      "label": "The tool backend",
+      "color": "grey"
+    }
+  },
+  "nodes": [
+    {
+      "id": "user",
+      "label": "The user asks an innocent question",
+      "group": "agent",
+      "x": 0,
+      "y": 150
+    },
+    {
+      "id": "agent",
+      "label": "The agent",
+      "group": "agent",
+      "x": 380,
+      "y": 150
+    },
+    {
+      "id": "hostile-mcp",
+      "label": "Hostile MCP server (poisoned metadata)",
+      "group": "hostile",
+      "x": 380,
+      "y": 0
+    },
+    {
+      "id": "hostile-card",
+      "label": "Hostile A2A specialist (poisoned Agent Card)",
+      "group": "hostile",
+      "x": 380,
+      "y": 330
+    },
+    {
+      "id": "scanner",
+      "label": "MCP Scanner Lab (reports)",
+      "group": "scan",
+      "x": 760,
+      "y": 150
+    },
+    {
+      "id": "gateway",
+      "label": "Privilege AI Gateway (enforces)",
+      "group": "enforce",
+      "x": 1140,
+      "y": 150
+    },
+    {
+      "id": "tool",
+      "label": "The tool backend (create_transfer)",
+      "group": "run",
+      "x": 1500,
+      "y": 150
+    }
+  ],
+  "edges": [
+    {
+      "source": "user",
+      "target": "agent",
+      "dashed": false
+    },
+    {
+      "source": "hostile-mcp",
+      "target": "agent",
+      "dashed": false
+    },
+    {
+      "source": "hostile-card",
+      "target": "agent",
+      "dashed": false
+    },
+    {
+      "source": "agent",
+      "target": "scanner",
+      "dashed": false
+    },
+    {
+      "source": "scanner",
+      "target": "gateway",
+      "dashed": true
+    },
+    {
+      "source": "agent",
+      "target": "gateway",
+      "dashed": false
+    },
+    {
+      "source": "gateway",
+      "target": "tool",
+      "dashed": false
+    }
+  ],
+  "steps": [
+    {
+      "id": "S01",
+      "edges": [
+        0
+      ],
+      "title": "The user asks something innocent",
+      "what": "\"What's the weather in Denver?\" The user never asked for money to move.",
+      "why": "Every attack below works without the user noticing anything."
+    },
+    {
+      "id": "S02",
+      "edges": [
+        1
+      ],
+      "title": "Tool poisoning reaches the agent",
+      "what": "A hostile MCP server serves tool descriptions and inputSchema defaults that carry hidden instructions (tool_poisoning). The agent ingests them as trusted context.",
+      "why": "Nothing in MCP inspects tool metadata; the poison arrives byte-for-byte."
+    },
+    {
+      "id": "S03",
+      "edges": [
+        2
+      ],
+      "title": "Inter-agent abuse reaches the agent",
+      "what": "A hostile A2A specialist serves an Agent Card claiming orchestrator authority (inter_agent_abuse). A generalist that trusts the card obeys it.",
+      "why": "A2A discovery does not inspect card text either."
+    },
+    {
+      "id": "S04",
+      "edges": [
+        3
+      ],
+      "title": "This lab scans before the agent acts",
+      "what": "The scanner flags the poison, a schema-violating call (schema_violation), and schema-valid but hostile arguments (tool_abuse). It REPORTS — it never blocks.",
+      "why": "A defense can only sit where the data is consumed. This is the detect half."
+    },
+    {
+      "id": "S05",
+      "edges": [
+        4,
+        5
+      ],
+      "title": "PingOne Privilege enforces the call",
+      "what": "The Privilege AI Gateway evaluates the tool call against policy: deny, hold for human approval (428), reject malformed input (400), refuse an unauthenticated agent (401).",
+      "why": "Detection informs; the gateway is the enforcement point. The AI-DEMO2 Attack Lab shows these verdicts live."
+    },
+    {
+      "id": "S06",
+      "edges": [
+        6
+      ],
+      "title": "Only a permitted call reaches the tool",
+      "what": "create_transfer runs only when policy permitted it. The demo stub moves no money.",
+      "why": "The user's innocent question ends with the user's intent, not the attacker's."
+    }
+  ]
+}
