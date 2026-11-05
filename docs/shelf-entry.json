@@ -1,0 +1,18 @@
+{
+  "demos": [
+    {
+      "id": "mcp-scanner-lab",
+      "name": "MCP Scanner Lab",
+      "catalogId": null,
+      "kind": "Tester",
+      "description": "The four Tool & Agent Safety categories of the PingOne Privilege AI Gateway guardrails (tool poisoning, schema violation, tool abuse, inter-agent abuse), demonstrated on demo fixtures or your own pasted metadata, Agent Card and tool-call JSON. The lab detects; the Privilege gateway enforces (see the AI-DEMO2 Attack Lab).",
+      "url": "http://localhost:7650",
+      "healthPath": "/api/health",
+      "composeFile": "mcp-scanner-lab/docker-compose.yml",
+      "composeOverlays": [],
+      "pingProducts": ["PingOne Privilege (AI Gateway guardrails)"],
+      "tags": ["mcp", "tool-poisoning", "schema-violation", "tool-abuse", "inter-agent-abuse", "agent-security", "scanner"],
+      "notes": "Host-run: npm start (port 7650, loopback). Mock: built-in poisoned fixtures, no tenant, no network. Real: paste your own data; still in-process. Docker: HOST_PORT=7650 docker compose up --build -d (published on 127.0.0.1 only). catalogId needs owner assignment."
+    }
+  ]
+}
