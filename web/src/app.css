@@ -60,3 +60,6 @@ textarea { width: 100%; min-height: 160px; font: 13px/1.45 var(--font-mono); res
   .cols { grid-template-columns: 1fr; }
   .head__tools { width: 100%; }
 }
+
+.talk { max-width: 52rem; }
+.talk__step { padding-left: 8px; border-left: 3px solid var(--accent); }

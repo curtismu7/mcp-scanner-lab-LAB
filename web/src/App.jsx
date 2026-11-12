@@ -4,8 +4,9 @@ import TopMenu, { applyFontSize } from "./top-menu/TopMenu.jsx";
 import ScanTab from "./tabs/ScanTab.jsx";
 import DiagramTab from "./tabs/DiagramTab.jsx";
 import AboutTab from "./tabs/AboutTab.jsx";
+import TalkTrackTab from "./tabs/TalkTrackTab.jsx";
 
-export const TABS = [["scan", "Scanner"], ["diagram", "How it fits"], ["about", "About"]];
+export const TABS = [["scan", "Scanner"], ["diagram", "How it fits"], ["about", "About"], ["talk", "Talk track"]];
 export const FALLBACK_BANNER = "MOCK mode. SIMULATED: the scanner runs on the built-in demo fixtures. In-process, no tenant, no outbound network. The scanner reports — it never blocks.";
 const read = (k, d) => { try { return localStorage.getItem(k) ?? d; } catch { return d; } };
 const write = (k, v) => { try { localStorage.setItem(k, v); } catch { /* not remembered */ } };
@@ -84,6 +85,7 @@ export default function App() {
             theme={{ value: theme === "system" ? "auto" : theme, onChange: (v) => setTheme(v === "auto" ? "system" : v) }}
             fontSize={{ value: fontStep, onChange: setFontStep }}
             present={{ active: present, onToggle: () => { const v = !present; setPresent(v); write("scanlab.present", v ? "1" : "0"); } }}
+            talkTrack={{ active: tab === "talk", onToggle: () => { setTab("talk"); window.location.hash = "#/talk"; } }}
             help={{ href: "https://github.com/curtismu7/mcp-scanner-lab#readme" }}
             version={info?.version || null}
             onReset={onReset}
@@ -106,6 +108,7 @@ export default function App() {
         {tab === "scan" ? <ScanTab info={info} fixtures={fixtures} run={run} onRun={onScan} busy={busy} error={error} /> : null}
         {tab === "diagram" ? <DiagramTab diagram={fixtures?.diagram} /> : null}
         {tab === "about" ? <AboutTab /> : null}
+        {tab === "talk" ? <TalkTrackTab /> : null}
       </main>
 
       <footer className="muted small" style={{ marginTop: 16 }}>
