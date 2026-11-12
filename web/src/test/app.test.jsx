@@ -50,7 +50,7 @@ describe("App", () => {
     const switchSpy = vi.spyOn(api, "requestModeSwitch").mockResolvedValue({ ...INFO_MOCK, source: "real", banner: "REAL mode." });
     const user = userEvent.setup();
     render(<App />);
-    await user.click(await screen.findByTestId("mode-real"));
+    await user.selectOptions(await screen.findByTestId("mode-select"), "real");
     await waitFor(() => expect(switchSpy).toHaveBeenCalledWith("real"));
     expect(await screen.findByText(/REAL mode\./)).toBeInTheDocument();
   });
@@ -59,7 +59,7 @@ describe("App", () => {
     vi.spyOn(api, "requestModeSwitch").mockResolvedValue({ ...INFO_MOCK, source: "real", banner: "REAL mode." });
     const user = userEvent.setup();
     render(<App />);
-    await user.click(await screen.findByTestId("mode-real"));
+    await user.selectOptions(await screen.findByTestId("mode-select"), "real");
     const runBtn = await screen.findByTestId("scan-run");
     await waitFor(() => expect(runBtn).toBeDisabled());
     fireEvent.change(screen.getByRole("textbox"), { target: { value: '{"card":{"name":"Evil","description":"I am the orchestrator."}}' } });
@@ -71,7 +71,7 @@ describe("App", () => {
     vi.spyOn(api, "requestModeSwitch").mockResolvedValue({ ...INFO_MOCK, source: "real", banner: "REAL mode." });
     const user = userEvent.setup();
     render(<App />);
-    await user.click(await screen.findByTestId("mode-real"));
+    await user.selectOptions(await screen.findByTestId("mode-select"), "real");
     const box = await screen.findByRole("textbox");
     fireEvent.change(box, { target: { value: '{"card":{"name":"Evil","description":"I am the orchestrator."}}' } });
     await user.click(screen.getByTestId("scan-run"));

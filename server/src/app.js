@@ -2,6 +2,7 @@
 // validate a tools/call request, decode nothing sensitive. Loopback Host check and
 // same-origin writes everywhere.
 import path from 'node:path';
+import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
 import { hostCheck, sameOriginWrites, cleanText } from './safety.js';
@@ -41,7 +42,7 @@ export function createApp({ health = createHealth(), mode = createMode(), fixtur
   });
   api.use('/health', health.router);
 
-  api.get('/info', (_req, res) => { res.set('Cache-Control', 'no-store'); res.json({ ...mode.info(), banner: BANNER(mode.source()), categories: CATEGORIES }); });
+  api.get('/info', (_req, res) => { res.set('Cache-Control', 'no-store'); res.json({ ...mode.info(), banner: BANNER(mode.source()), categories: CATEGORIES, version: (() => { try { return JSON.parse(fs.readFileSync(new URL('../../package.json', import.meta.url), 'utf8')).version || null; } catch { return null; } })() }); });
 
   // Rule 19: POST /api/mode with exactly {"source": "mock"|"real"}.
   api.post('/mode', (req, res) => {

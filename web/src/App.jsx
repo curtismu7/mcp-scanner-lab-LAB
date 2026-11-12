@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { getInfo, getFixtures, requestModeSwitch, resetServer, runScan } from "./lib/api.js";
-import ModeToggle from "./components/ModeToggle.jsx";
+import TopMenu, { applyFontSize } from "./top-menu/TopMenu.jsx";
 import ScanTab from "./tabs/ScanTab.jsx";
 import DiagramTab from "./tabs/DiagramTab.jsx";
 import AboutTab from "./tabs/AboutTab.jsx";
@@ -19,6 +19,7 @@ export default function App() {
   const [tab, setTab] = useState(tabFromHash);
   const [theme, setTheme] = useState(() => (["light", "dark"].includes(read("scanlab.theme", "")) ? read("scanlab.theme", "") : "system"));
   const [present, setPresent] = useState(() => read("scanlab.present", "0") === "1");
+  const [fontStep, setFontStep] = useState(() => (["S", "M", "L"].includes(read("mcpscan.font", "")) ? read("mcpscan.font", "") : "M"));
   const [run, setRun] = useState(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
@@ -31,6 +32,7 @@ export default function App() {
   useEffect(() => { loadAll().catch((e) => setLoadError(e.message)); }, [loadAll]);
   useEffect(() => { const on = () => setTab(tabFromHash()); window.addEventListener("hashchange", on); return () => window.removeEventListener("hashchange", on); }, []);
   useEffect(() => { if (theme === "system") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = theme; }, [theme]);
+  useEffect(() => { applyFontSize(fontStep); write("mcpscan.font", fontStep); }, [fontStep]);
   useEffect(() => { if (present) document.documentElement.dataset.present = "1"; else delete document.documentElement.dataset.present; }, [present]);
   useEffect(() => {
     const on = (e) => {
@@ -64,7 +66,6 @@ export default function App() {
   }, []);
 
   const banner = info?.banner || loadError?.toString() || FALLBACK_BANNER;
-  const themeNext = theme === "system" ? "light" : theme === "light" ? "dark" : "system";
 
   return (
     <div className="page">
@@ -73,12 +74,20 @@ export default function App() {
         <h1 className="head__title"><span className="head__mark" aria-hidden="true">SCAN</span> MCP Scanner Lab</h1>
         <div className="head__tools">
           <span className="chip">{info ? `${info.source.toUpperCase()} mode` : "…"}</span>
-          <ModeToggle info={info} onSelect={onMode} />
-          <button type="button" className="btn small" onClick={() => setTheme(themeNext)} aria-label={`Theme: ${theme}. Switch to ${themeNext}.`} data-testid="theme">
-            {theme === "dark" ? "🌙" : theme === "light" ? "☀️" : "🌗"} {theme}
-          </button>
-          <button type="button" className="btn small" aria-pressed={present} onClick={() => { const v = !present; setPresent(v); write("scanlab.present", v ? "1" : "0"); }} data-testid="present">Present</button>
-          <button type="button" className="btn small" onClick={onReset} disabled={busy} data-testid="reset">Reset</button>
+          <TopMenu
+            mode={{
+              value: info?.source === "real" ? "real" : "mock",
+              onChange: onMode,
+              realAvailable: info ? info.realAvailable === true : false,
+              realHint: info?.realReason,
+            }}
+            theme={{ value: theme === "system" ? "auto" : theme, onChange: (v) => setTheme(v === "auto" ? "system" : v) }}
+            fontSize={{ value: fontStep, onChange: setFontStep }}
+            present={{ active: present, onToggle: () => { const v = !present; setPresent(v); write("scanlab.present", v ? "1" : "0"); } }}
+            help={{ href: "https://github.com/curtismu7/mcp-scanner-lab#readme" }}
+            version={info?.version || null}
+            onReset={onReset}
+          />
         </div>
       </header>
 
