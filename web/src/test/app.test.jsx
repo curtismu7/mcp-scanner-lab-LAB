@@ -3,6 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { fireEvent } from "@testing-library/react";
 import App from "../App.jsx";
+import { setJsonView } from "../components/JsonPane.jsx";
 import * as api from "../lib/api.js";
 
 const INFO_MOCK = { source: "mock", realAvailable: true, realReason: null, banner: "MOCK mode. SIMULATED.", categories: ["tool-poisoning", "schema-violation", "tool-abuse", "inter-agent-abuse"] };
@@ -20,6 +21,7 @@ const SCAN_RESPONSE = {
 describe("App", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    setJsonView("form");
     vi.spyOn(api, "getInfo").mockResolvedValue(INFO_MOCK);
     vi.spyOn(api, "getFixtures").mockResolvedValue(FIXTURES_MOCK);
   });
@@ -97,5 +99,40 @@ describe("App", () => {
     render(<App />);
     await user.click(await screen.findByTestId("scan-run"));
     await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("boom"));
+  });
+
+  it("rule 24: the raw findings go through JsonPane (Form | JSON)", async () => {
+    vi.spyOn(api, "runScan").mockResolvedValue(SCAN_RESPONSE);
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(await screen.findByTestId("scan-run"));
+    await waitFor(() => expect(screen.getByTestId("scan-results")).toBeInTheDocument());
+    // Form is the default view: a labelled form, not JSON text.
+    expect(screen.getByTestId("findings").tagName).toBe("DIV");
+    expect(screen.getByTestId("findings")).toHaveTextContent("get_weather");
+    expect(screen.getByRole("button", { name: "Form" })).toHaveAttribute("aria-pressed", "true");
+    await user.click(screen.getByTestId("findings-raw"));
+    const raw = screen.getByTestId("findings");
+    expect(raw.tagName).toBe("PRE");
+    expect(raw).toHaveTextContent('"target": "get_weather"');
+    expect(raw).toHaveTextContent('"kind": "inter-agent-abuse"');
+    expect(screen.getByRole("button", { name: "JSON" })).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("rule 24: pasted hostile text stays inert text, control and bidi characters become visible escapes", async () => {
+    vi.spyOn(api, "requestModeSwitch").mockResolvedValue({ ...INFO_MOCK, source: "real", banner: "REAL mode." });
+    setJsonView("raw");
+    const user = userEvent.setup();
+    const { container } = render(<App />);
+    await user.selectOptions(await screen.findByTestId("mode-select"), "real");
+    fireEvent.change(await screen.findByRole("textbox"), { target: { value: '{"description":"<img src=x onerror=alert(1)> \u202e hidden","raw":"a\u202eb"}' } });
+    const pane = await screen.findByTestId("pasted");
+    expect(pane.querySelector("img")).toBeNull();
+    expect(container.querySelector("img")).toBeNull();
+    expect(pane).toHaveTextContent("<img src=x onerror=alert(1)>");
+    // A pasted string that is not JSON stays text too, with the real character shown as an escape.
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "not json \u202e <b>x</b>" } });
+    await waitFor(() => expect(screen.getByTestId("pasted")).toHaveTextContent("\\u202e"));
+    expect(container.querySelector("b")).toBeNull();
   });
 });
