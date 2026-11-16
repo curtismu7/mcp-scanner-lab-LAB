@@ -62,7 +62,7 @@ export default function ScanTab({ info, fixtures, run, onRun, busy, error }) {
       ) : null}
 
       <div className="actions">
-        <button type="button" className="btn" onClick={scan} disabled={busy || (real && !pasted)} data-testid="scan-run">
+        <button type="button" className="btn primary" onClick={scan} disabled={busy || (real && !pasted)} data-testid="scan-run">
           {busy ? "Scanning…" : real ? "Scan pasted data" : "Scan the demo fixtures"}
         </button>
       </div>

@@ -31,8 +31,34 @@ describe("App", () => {
     render(<App />);
     expect(await screen.findByText(/MOCK mode\. SIMULATED\./)).toBeInTheDocument();
     expect(screen.getByTestId("scan-idle")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Scanner" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "About" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Scanner" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "About" })).not.toHaveAttribute("aria-current");
+  });
+
+  it("shell bar: brand, Mock badge, nav pills and the TopMenu in header.shell-bar; the banner opens <main>; Scan is the one primary", async () => {
+    render(<App />);
+    await screen.findByText(/MOCK mode\. SIMULATED\./);
+    const bar = document.querySelector("header.shell-bar");
+    expect(bar).not.toBeNull();
+    expect(document.querySelector(".app > header.shell-bar + main")).not.toBeNull(); // shell bar first, then main
+    expect(bar.querySelector(".shell-brand h1")).toHaveTextContent("MCP Scanner Lab");
+    expect(screen.getByTestId("mode-badge")).toHaveTextContent("Mock");
+    expect(bar.querySelector('.shell-nav a[aria-current="page"]')).toHaveTextContent("Scanner");
+    expect(bar.querySelector("[data-testid=top-menu]")).toHaveClass("shell-right");
+    expect(document.querySelector("main").firstElementChild).toHaveClass("banner");
+    expect(document.querySelectorAll("main button.primary")).toHaveLength(1);
+    expect(screen.getByTestId("scan-run")).toHaveClass("primary");
+  });
+
+  it("a nav pill switches the section and moves aria-current", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await screen.findByText(/MOCK mode\. SIMULATED\./);
+    await user.click(screen.getByRole("link", { name: "About" }));
+    expect(await screen.findByRole("heading", { name: /four Tool & Agent Safety categories/ })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "About" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Scanner" })).not.toHaveAttribute("aria-current");
+    window.location.hash = "";
   });
 
   it("a scan shows the four category cells and the finding counts", async () => {

@@ -69,49 +69,50 @@ export default function App() {
   const banner = info?.banner || loadError?.toString() || FALLBACK_BANNER;
 
   return (
-    <div className="page">
+    <div className="app">
       <a className="skip" href="#main">Skip to content</a>
-      <header className="head">
-        <h1 className="head__title"><span className="head__mark" aria-hidden="true">SCAN</span> MCP Scanner Lab</h1>
-        <div className="head__tools">
-          <span className="chip">{info ? `${info.source.toUpperCase()} mode` : "…"}</span>
-          <TopMenu
-            mode={{
-              value: info?.source === "real" ? "real" : "mock",
-              onChange: onMode,
-              realAvailable: info ? info.realAvailable === true : false,
-              realHint: info?.realReason,
-            }}
-            theme={{ value: theme === "system" ? "auto" : theme, onChange: (v) => setTheme(v === "auto" ? "system" : v) }}
-            fontSize={{ value: fontStep, onChange: setFontStep }}
-            present={{ active: present, onToggle: () => { const v = !present; setPresent(v); write("scanlab.present", v ? "1" : "0"); } }}
-            talkTrack={{ active: tab === "talk", onToggle: () => { setTab("talk"); window.location.hash = "#/talk"; } }}
-            help={{ href: "https://github.com/curtismu7/mcp-scanner-lab#readme" }}
-            version={info?.version || null}
-            onReset={onReset}
-          />
-        </div>
+      <header className="shell-bar">
+        <span className="shell-brand">
+          <span className="shell-logo" aria-hidden="true">SCAN</span>
+          <h1>MCP Scanner Lab</h1>
+          {info?.source === "real"
+            ? <span className="shell-badge shell-badge--real" data-testid="mode-badge">Real</span>
+            : <span className="shell-badge" data-testid="mode-badge">Mock</span>}
+        </span>
+        <nav className="shell-nav" aria-label="Lab sections">
+          {TABS.map(([id, label]) => (
+            <a key={id} href={`#/${id}`} aria-current={tab === id ? "page" : undefined} onClick={() => setTab(id)}>{label}</a>
+          ))}
+        </nav>
+        <TopMenu
+          mode={{
+            value: info?.source === "real" ? "real" : "mock",
+            onChange: onMode,
+            realAvailable: info ? info.realAvailable === true : false,
+            realHint: info?.realReason,
+          }}
+          theme={{ value: theme === "system" ? "auto" : theme, onChange: (v) => setTheme(v === "auto" ? "system" : v) }}
+          fontSize={{ value: fontStep, onChange: setFontStep }}
+          present={{ active: present, onToggle: () => { const v = !present; setPresent(v); write("scanlab.present", v ? "1" : "0"); } }}
+          talkTrack={{ active: tab === "talk", onToggle: () => { setTab("talk"); window.location.hash = "#/talk"; } }}
+          help={{ href: "https://github.com/curtismu7/mcp-scanner-lab#readme" }}
+          version={info?.version || null}
+          onReset={onReset}
+        />
       </header>
 
-      <p className="banner" role="note">{banner}</p>
-      {loadError ? <p className="alert" role="alert">Server unreachable: {loadError}. Start it with <code>npm start -w server</code>.</p> : null}
-      <p className="sr-only" role="status">{announce}</p>
+      <main id="main" className="page" tabIndex={-1}>
+        <p className="banner" role="note">{banner}</p>
+        {loadError ? <p className="alert" role="alert">Server unreachable: {loadError}. Start it with <code>npm start -w server</code>.</p> : null}
+        <p className="sr-only" role="status">{announce}</p>
 
-      <nav className="tabs" aria-label="Tabs">
-        {TABS.map(([id, label]) => (
-          <button key={id} type="button" className="btn" aria-current={tab === id ? "page" : undefined}
-            onClick={() => { setTab(id); window.location.hash = `#/${id}`; }}>{label}</button>
-        ))}
-      </nav>
-
-      <main id="main" tabIndex={-1}>
         {tab === "scan" ? <ScanTab info={info} fixtures={fixtures} run={run} onRun={onScan} busy={busy} error={error} /> : null}
         {tab === "diagram" ? <DiagramTab diagram={fixtures?.diagram} /> : null}
         {tab === "about" ? <AboutTab /> : null}
         {tab === "talk" ? <TalkTrackTab /> : null}
       </main>
 
-      <footer className="muted small" style={{ marginTop: 16 }}>
+      <footer className="page-foot muted small">
         mcp-scanner-lab · Tester tier · categories from the PingOne Privilege AI Gateway guardrails · loopback only, zero outbound calls · the scanner reports, the Privilege gateway enforces (see the AI-DEMO2 Attack Lab)
       </footer>
     </div>
