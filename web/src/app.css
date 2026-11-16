@@ -45,7 +45,6 @@ code { font-size: 13px; overflow-wrap: anywhere; }
 
 .inert { white-space: pre-wrap; overflow-wrap: anywhere; }
 .inert-wrap { display: flex; flex-direction: column; gap: 4px; flex: 1 1 100%; }
-.inert--block { display: block; margin: 4px 0; padding: 10px; font: 13px/1.45 var(--font-mono); border: 1px dashed var(--border); border-radius: 8px; background: var(--surface-2); color: var(--text); max-height: 352px; overflow: auto; }
 textarea { width: 100%; min-height: 160px; font: 13px/1.45 var(--font-mono); resize: vertical; }
 
 .claims { width: 100%; border-collapse: collapse; font-size: 14px; }
