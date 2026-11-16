@@ -4,7 +4,8 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ReactFlow, Background, Controls, useNodesState, useEdgesState } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
-const ROLE_COLORS = { red: "#b42318", dark: "#0b2537", grey: "#6b7280", blue: "#175cd3", green: "#067647", amber: "#b54708" };
+// Role colours are the shared diagram tokens (standalone-ui.css --dg-*), so boxes and legend follow the theme.
+const ROLE_COLORS = { red: "var(--dg-red)", dark: "var(--dg-dark)", grey: "var(--dg-grey)", blue: "var(--dg-blue)", green: "var(--dg-green)", amber: "var(--dg-amber)" };
 
 function StepWalk({ steps, speed, onStep }) {
   const [i, setI] = useState(-1);
@@ -13,7 +14,7 @@ function StepWalk({ steps, speed, onStep }) {
   return (
     <div className="stepwalk">
       <div className="actions">
-        <button type="button" className="btn small" onClick={() => setI(0)} data-testid="diagram-simulate">Simulate</button>
+        <button type="button" className="btn small primary" onClick={() => setI(0)} data-testid="diagram-simulate">Simulate</button>
         <button type="button" className="btn small" onClick={() => setI(-1)} data-testid="diagram-stop">Stop</button>
         <span className="small muted">{step ? `Step ${i + 1}/${steps.length}: ${step.label}` : `${steps.length} steps`}</span>
       </div>
@@ -65,16 +66,16 @@ export default function DiagramTab({ diagram }) {
         </label>
         <button type="button" className="btn small" onClick={reset} data-testid="diagram-reset">Reset</button>
       </div>
-      <div style={{ height: 380, border: "1px solid var(--border)", borderRadius: 8 }}>
+      <div className="flow-frame">
         <ReactFlow nodes={nodes} edges={edges} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange} fitView proOptions={{ hideAttribution: true }}>
           <Background />
           <Controls showInteractive={false} />
         </ReactFlow>
       </div>
       <StepWalk steps={diagram.steps || []} speed={speed} onStep={onStep} />
-      <ul className="small muted" style={{ columns: 2 }}>
+      <ul className="legend small muted">
         {Object.entries(diagram.groups || {}).map(([k, g]) => (
-          <li key={k}><span style={{ color: ROLE_COLORS[g.color] }}>■</span> {g.label}</li>
+          <li key={k}><span className="legend__swatch" data-color={ROLE_COLORS[g.color] ? g.color : "grey"} aria-hidden="true">■</span> {g.label}</li>
         ))}
       </ul>
     </section>
