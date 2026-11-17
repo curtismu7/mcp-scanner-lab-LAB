@@ -4,7 +4,7 @@ html { font-size: var(--fs, 16px); }
 :root[data-present="1"] body { font-size: 20px; }
 /* Page frame (STANDALONE-UI-PATTERNS.md section 3): one centred 1100px column; the simulation banner is its first child.
    No width cap on .app: the body has the 16px gutter, the shell bar (-16px) runs edge to edge. */
-.page, .page-foot { max-width: 1100px; margin-left: auto; margin-right: auto; }
+.page, .page-foot { max-width: 2200px; margin-left: auto; margin-right: auto; }
 .page { padding: 4px 0 32px; }
 .page:focus:not(:focus-visible) { outline: none; } /* the skip link focuses <main>; keyboard focus still shows the shared ring */
 .page > .card, .page > .talk { margin-top: 16px; }
