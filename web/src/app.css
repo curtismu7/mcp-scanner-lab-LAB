@@ -42,8 +42,9 @@ code { font-size: 13px; overflow-wrap: anywhere; }
 .alert { padding: 8px 12px; border-radius: 8px; background: var(--accent-soft); color: var(--danger-text); border: 1px solid var(--danger-text); }
 .controls { display: flex; flex-wrap: wrap; align-items: end; gap: 12px 20px; }
 .controls label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; color: var(--text); min-width: 0; max-width: 100%; }
-.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 14px; align-items: start; }
+.cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; align-items: start; }
 .cols > * { min-width: 0; }
+@media (max-width: 900px) { .cols { grid-template-columns: minmax(0, 1fr); } }
 .actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
 .pill { display: inline-block; padding: 1px 10px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font-size: 12px; font-weight: 700; }
 .pill[data-state="ok"] { border-color: var(--status-ok); color: var(--status-ok); }
