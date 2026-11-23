@@ -95,7 +95,7 @@ export default function App() {
           fontSize={{ value: fontStep, onChange: setFontStep }}
           present={{ active: present, onToggle: () => { const v = !present; setPresent(v); write("scanlab.present", v ? "1" : "0"); } }}
           talkTrack={{ active: tab === "talk", onToggle: () => { setTab("talk"); window.location.hash = "#/talk"; } }}
-          help={{ href: "https://github.com/curtismu7/mcp-scanner-lab#readme" }}
+          help={{ href: "https://github.com/curtismu7/mcp-scanner-lab-LAB#readme" }}
           version={info?.version || null}
           onReset={onReset}
         />
