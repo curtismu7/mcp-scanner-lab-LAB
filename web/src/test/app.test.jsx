@@ -2,11 +2,11 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { fireEvent } from "@testing-library/react";
-import App from "../App.jsx";
+import App, { MODE_LINES } from "../App.jsx";
 import { setJsonView } from "../components/JsonPane.jsx";
 import * as api from "../lib/api.js";
 
-const INFO_MOCK = { source: "mock", realAvailable: true, realReason: null, banner: "MOCK mode. SIMULATED.", categories: ["tool-poisoning", "schema-violation", "tool-abuse", "inter-agent-abuse"] };
+const INFO_MOCK = { source: "mock", realAvailable: true, realReason: null, version: "v0.1.0", banner: "MOCK mode. SIMULATED.", categories: ["tool-poisoning", "schema-violation", "tool-abuse", "inter-agent-abuse"] };
 const FIXTURES_MOCK = { poisoned: {}, clean: {} };
 const SCAN_RESPONSE = {
   source: "mock", total: 2,
@@ -26,18 +26,43 @@ describe("App", () => {
     vi.spyOn(api, "getFixtures").mockResolvedValue(FIXTURES_MOCK);
   });
 
-  it("renders the banner, tabs and an idle scanner", async () => {
+  it("opens on a modal that says MOCK and what is simulated, closes on Got it, and the old banner is gone", async () => {
     vi.spyOn(api, "runScan").mockResolvedValue(SCAN_RESPONSE);
-    render(<App />);
-    expect(await screen.findByText(/MOCK mode\. SIMULATED\./)).toBeInTheDocument();
+    const { unmount } = render(<App />);
+    const modal = await screen.findByTestId("mode-modal");
+    expect(modal).toHaveAttribute("data-mode", "mock");
+    expect(modal).toHaveTextContent("MOCK");
+    expect(modal).toHaveTextContent(MODE_LINES.mock);
+    expect(modal).toHaveTextContent(/SIMULATED/);
+    expect(modal).toHaveTextContent(/never blocks/);
+    expect(modal).toHaveTextContent(/no outbound network/);
+    expect(document.querySelector("main > .banner")).toBeNull();
     expect(screen.getByTestId("scan-idle")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Scanner" })).toHaveAttribute("aria-current", "page");
     expect(screen.getByRole("link", { name: "About" })).not.toHaveAttribute("aria-current");
+    fireEvent.click(screen.getByTestId("mode-modal-ok"));
+    expect(screen.queryByTestId("mode-modal")).toBeNull();
+    unmount();
+    render(<App />);
+    await screen.findByTestId("version");
+    expect(screen.queryByTestId("mode-modal")).toBeNull();
   });
 
-  it("shell bar: brand, Mock badge, nav pills and the TopMenu in header.shell-bar; the banner opens <main>; Scan is the one primary", async () => {
+  it("a Real lab shows MOCK until /api/info answers, then REAL with its own line", async () => {
+    let release;
+    vi.spyOn(api, "getInfo").mockReturnValue(new Promise((r) => { release = r; }));
     render(<App />);
-    await screen.findByText(/MOCK mode\. SIMULATED\./);
+    expect((await screen.findByTestId("mode-modal")).dataset.mode).toBe("mock");
+    release({ ...INFO_MOCK, source: "real" });
+    await waitFor(() => expect(screen.getByTestId("mode-modal").dataset.mode).toBe("real"));
+    expect(screen.getByTestId("mode-modal")).toHaveTextContent("REAL");
+    expect(screen.getByTestId("mode-modal")).toHaveTextContent(MODE_LINES.real);
+    expect(screen.getByTestId("mode-modal")).toHaveTextContent(/never blocks/);
+  });
+
+  it("shell bar: brand, Mock badge, nav pills and the TopMenu in header.shell-bar; main holds no simulation banner; Scan is the one primary", async () => {
+    render(<App />);
+    await screen.findByTestId("version");
     const bar = document.querySelector("header.shell-bar");
     expect(bar).not.toBeNull();
     expect(document.querySelector(".app > header.shell-bar + main")).not.toBeNull(); // shell bar first, then main
@@ -45,7 +70,7 @@ describe("App", () => {
     expect(screen.getByTestId("mode-badge")).toHaveTextContent("Mock");
     expect(bar.querySelector('.shell-nav a[aria-current="page"]')).toHaveTextContent("Scanner");
     expect(bar.querySelector("[data-testid=top-menu]")).toHaveClass("shell-right");
-    expect(document.querySelector("main").firstElementChild).toHaveClass("banner");
+    expect(document.querySelector("main").firstElementChild).not.toHaveClass("banner");
     expect(document.querySelectorAll("main button.primary")).toHaveLength(1);
     expect(screen.getByTestId("scan-run")).toHaveClass("primary");
   });
@@ -53,7 +78,7 @@ describe("App", () => {
   it("a nav pill switches the section and moves aria-current", async () => {
     const user = userEvent.setup();
     render(<App />);
-    await screen.findByText(/MOCK mode\. SIMULATED\./);
+    await screen.findByTestId("version");
     await user.click(screen.getByRole("link", { name: "About" }));
     expect(await screen.findByRole("heading", { name: /four Tool & Agent Safety categories/ })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "About" })).toHaveAttribute("aria-current", "page");
@@ -80,7 +105,8 @@ describe("App", () => {
     render(<App />);
     await user.selectOptions(await screen.findByTestId("mode-select"), "real");
     await waitFor(() => expect(switchSpy).toHaveBeenCalledWith("real"));
-    expect(await screen.findByText(/REAL mode\./)).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByTestId("mode-modal").dataset.mode).toBe("real"));
+    expect(screen.getByTestId("mode-modal")).toHaveTextContent("REAL");
   });
 
   it("Real mode disables the scan button until data is pasted", async () => {

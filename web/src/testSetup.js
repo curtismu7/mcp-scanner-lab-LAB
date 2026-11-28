@@ -1,4 +1,8 @@
 import "@testing-library/jest-dom/vitest";
+import { afterEach } from "vitest";
+
+// The Real-or-mock modal remembers "Got it" in sessionStorage: start every test with it open again.
+afterEach(() => { try { sessionStorage.clear(); } catch { /* none */ } });
 
 // Some Node versions expose a half-working global localStorage that shadows jsdom's; use a plain in-memory one.
 if (typeof globalThis.localStorage?.clear !== "function") {

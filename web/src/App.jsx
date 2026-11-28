@@ -5,9 +5,14 @@ import ScanTab from "./tabs/ScanTab.jsx";
 import DiagramTab from "./tabs/DiagramTab.jsx";
 import AboutTab from "./tabs/AboutTab.jsx";
 import TalkTrackTab from "./tabs/TalkTrackTab.jsx";
+import ModeModal from "./mode-modal/ModeModal.jsx";
 
 export const TABS = [["scan", "Scanner"], ["diagram", "How it fits"], ["about", "About"], ["talk", "Talk track"]];
-export const FALLBACK_BANNER = "MOCK mode. SIMULATED: the scanner runs on the built-in demo fixtures. In-process, no tenant, no outbound network. The scanner reports — it never blocks.";
+// The one-line facts the old banner carried: what runs on what, zero outbound, and that the scanner reports and never blocks.
+export const MODE_LINES = {
+  mock: "SIMULATED: the scanner runs on built-in demo fixtures, in-process, with no tenant and no outbound network. It reports and never blocks; the Privilege gateway enforces.",
+  real: "The scanner runs on the tool metadata, Agent Card and tool-call JSON you paste in, still in-process with zero outbound calls. It reports and never blocks; the Privilege gateway enforces.",
+};
 const read = (k, d) => { try { return localStorage.getItem(k) ?? d; } catch { return d; } };
 const write = (k, v) => { try { localStorage.setItem(k, v); } catch { /* not remembered */ } };
 const tabFromHash = () => { const id = window.location.hash.replace(/^#\/?/, "").split("?")[0]; return TABS.some(([t]) => t === id) ? id : "scan"; };
@@ -66,8 +71,6 @@ export default function App() {
     catch (e) { setError(e.message); } finally { setBusy(false); }
   }, []);
 
-  const banner = info?.banner || loadError?.toString() || FALLBACK_BANNER;
-
   return (
     <div className="app">
       <a className="skip" href="#main">Skip to content</a>
@@ -102,7 +105,6 @@ export default function App() {
       </header>
 
       <main id="main" className="page" tabIndex={-1}>
-        <p className="banner" role="note">{banner}</p>
         {loadError ? <p className="alert" role="alert">Server unreachable: {loadError}. Start it with <code>npm start -w server</code>.</p> : null}
         <p className="sr-only" role="status">{announce}</p>
 
@@ -115,6 +117,7 @@ export default function App() {
       <footer className="page-foot muted small">
         mcp-scanner-lab · Tester tier · categories from the PingOne Privilege AI Gateway guardrails · loopback only, zero outbound calls · the scanner reports, the Privilege gateway enforces (see the AI-DEMO2 Attack Lab)
       </footer>
+      <ModeModal mode={info?.source === "real" ? "real" : "mock"} lines={MODE_LINES} storageKey="scan-mode" />
     </div>
   );
 }

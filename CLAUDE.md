@@ -23,7 +23,7 @@ Follow the rulebook at `~/Development/STANDALONE-RULES.md`.
 - Loopback bind only (`SCANLAB_BIND` opt-in; Docker publishes `127.0.0.1:` only), Host check,
   same-origin writes.
 - Zero outbound calls: netguard on every socket/DNS/fetch/UDP path, with self-tests.
-- The scanner REPORTS; it never blocks, and it says so on every surface (banner, About, README).
+- The scanner REPORTS; it never blocks, and it says so on every surface (the Real-or-mock modal, About, README).
 - Hostile pasted text is rendered inert (text nodes only).
 - Ports 7650-7659. Node 26 only.
 
